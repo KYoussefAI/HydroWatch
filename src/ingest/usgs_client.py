@@ -24,8 +24,8 @@ RETRYABLE_STATUS_CODES = {
 }
 
 
-def fetch_url(endpoint_or_url, params=None):
-    url = endpoint_or_url if endpoint_or_url.startswith("https://") else BASE_URL + endpoint
+def fetch_url(endpoint_or_url, params):
+    url = endpoint_or_url if endpoint_or_url.startswith("https://") else BASE_URL + endpoint_or_url
 
     max_retries = 3
     for attempt in range(1, max_retries + 1):
@@ -81,13 +81,21 @@ def fetch_url(endpoint_or_url, params=None):
             time.sleep(wait_seconds)
 
 
-def save_raw_json(data,batch_id):
+def get_next_url(data):
+    for link in data.get("links",[]):
+        if link["rel"] == "next" :
+            return link["href"]
+        
+    return None
+
+
+def save_raw_json(data,batch_id,page_number):
 
     raw_dir = Path("data/raw/observations")
     raw_dir.mkdir(parents=True, exist_ok=True)
 
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
-    file_path = raw_dir / f"observations_{timestamp}_{batch_id}.json"
+    file_path = raw_dir / f"observations_{timestamp}_{batch_id}_page_{page_number:03d}.json"
 
     with file_path.open("w",encoding="utf-8") as file :
         json.dump(data,file,indent=2)

@@ -4,10 +4,10 @@ from psycopg.types.json import Jsonb
 import os
 from dotenv import load_dotenv
 
-from datetime import datetime,timezone
+from datetime import datetime, timezone, timedelta
 import uuid
 
-from usgs_client import fetch_url, save_raw_json
+from usgs_client import fetch_url, get_next_url, save_raw_json
 
 load_dotenv()
 
@@ -92,32 +92,53 @@ def insert_observations(connection, rows):
 def main():
     batch_id = str(uuid.uuid4())
 
+    end = datetime.now(timezone.utc)
+    start = end - timedelta(days=1)
+    date_range = (
+        f"{start.strftime('%Y-%m-%dT%H:%M:%SZ')}/"
+        f"{end.strftime('%Y-%m-%dT%H:%M:%SZ')}"
+    )
+    date_range = os.getenv("USGS_DATETIME") or date_range
+
+    url = "collections/continuous/items"
     params = {
         "monitoring_location_id": "USGS-06115200,USGS-06066500,USGS-06052500",
         "parameter_code": "00060,00065,00010",
+        "datetime": date_range, # for testing purposes
         "limit": 500
     }
+    page_number = 0
+    all_rows = []
 
-    data = fetch_url(
-        "collections/continuous/items",
-        params
-    )
+    while url:
+        data = fetch_url(
+            url,
+            params 
+        )
+        extracted_at = datetime.now(timezone.utc)
+        page_number += 1
 
-    extracted_at = datetime.now(timezone.utc)
+        save_raw_json(data,batch_id,page_number)
 
-    save_raw_json(data,batch_id)
+        rows = prepare_observations(data,extracted_at,batch_id) 
+        all_rows.extend(rows)
 
-    rows = prepare_observations(data,extracted_at,batch_id)
+        print(f"Page {page_number}: {len(rows)} observations")
 
-    connection = connect_db()
-    try:
-        insert_observations(connection,rows)
-    finally :
-        connection.close()
+        url = get_next_url(data)
+        params = None
 
-    print(f"Inserted : {len(rows)} observations \
-          | batch_id : {batch_id} \
-          | extracted_at : {extracted_at}")
+    if all_rows:
+        connection = connect_db()
+
+        try:
+            insert_observations(connection,all_rows)
+        finally :
+            connection.close()
+
+        print(f"Inserted : {len(all_rows)} observations\
+            | batch_id : {batch_id}\
+            | extracted_at : {extracted_at}")
 
 
 if __name__ == "__main__":

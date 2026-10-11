@@ -8,14 +8,15 @@
         "monitoring_location_id": "USGS-06115200",
         "parameter_code": "00060",
         "statistic_id": "00011",
-        "time": "2025-10-08T03:30:00+00:00",
-        "value": "4820",
+        "time": "2025-10-09T21:00:00+00:00",
+        "value": "4750",
         "unit_of_measure": "ft^3/s",
         "approval_status": "Provisional",
         "qualifier": null,
-        "last_modified": "2025-10-08T04:17:11.893044+00:00",
+        "last_modified": "2025-10-09T21:17:12.377828+00:00",
         "method_category": null
       },
+      "id": "187837c5-f7d8-4896-8230-6244d9b9c35d",
       "geometry": {
         "type": "Point",
         "coordinates": [
@@ -24,5 +25,45 @@
         ]
       }
     }
-  ]
+  ],
+  "numberReturned": 1,
+  "links": [
+    {
+      "rel": "next",
+      "href": "https://api.waterdata.usgs.gov/ogcapi/v1/collections/continuous/items?cursor=M2FjMWJjZjU2OWVmNDIxMzkwNTU1NzBlYjIzYzEyYWR8MjAyNS0xMC0wOSAyMTowMDowMCswMDowMA&monitoring_location_id=USGS-06115200&parameter_code=00060&limit=1",
+      "type": "application/geo+json",
+      "title": "Items (next)"
+    },
+    {
+      "type": "application/geo+json",
+      "rel": "self",
+      "title": "This document as GeoJSON",
+      "href": "https://api.waterdata.usgs.gov/ogcapi/v1/collections/continuous/items?f=json&monitoring_location_id=USGS-06115200&parameter_code=00060&limit=1"
+    },
+    {
+      "rel": "alternate",
+      "type": "application/ld+json",
+      "title": "This document as RDF (JSON-LD)",
+      "href": "https://api.waterdata.usgs.gov/ogcapi/v1/collections/continuous/items?f=jsonld&monitoring_location_id=USGS-06115200&parameter_code=00060&limit=1"
+    },
+    {
+      "type": "text/html",
+      "rel": "alternate",
+      "title": "This document as HTML",
+      "href": "https://api.waterdata.usgs.gov/ogcapi/v1/collections/continuous/items?f=html&monitoring_location_id=USGS-06115200&parameter_code=00060&limit=1"
+    },
+    {
+      "type": "text/csv; charset=utf-8",
+      "rel": "alternate",
+      "title": "This document as CSV",
+      "href": "https://api.waterdata.usgs.gov/ogcapi/v1/collections/continuous/items?f=csv&monitoring_location_id=USGS-06115200&parameter_code=00060&limit=1"
+    },
+    {
+      "type": "application/json",
+      "title": "Continuous values",
+      "rel": "collection",
+      "href": "https://api.waterdata.usgs.gov/ogcapi/v1/collections/continuous"
+    }
+  ],
+  "timeStamp": "2026-10-09T20:35:19.386384Z"
 }
