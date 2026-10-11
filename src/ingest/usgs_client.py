@@ -89,13 +89,13 @@ def get_next_url(data):
     return None
 
 
-def save_raw_json(data,batch_id,page_number):
+def save_raw_json(data,batch_id,page_number,dataset="observations"):
 
-    raw_dir = Path("data/raw/observations")
+    raw_dir = Path("data/raw") / dataset
     raw_dir.mkdir(parents=True, exist_ok=True)
 
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
-    file_path = raw_dir / f"observations_{timestamp}_{batch_id}_page_{page_number:03d}.json"
+    file_path = raw_dir / f"{dataset}_{timestamp}_{batch_id}_page_{page_number:03d}.json"
 
     with file_path.open("w",encoding="utf-8") as file :
         json.dump(data,file,indent=2)
