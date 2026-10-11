@@ -103,19 +103,3 @@ def save_raw_json(data,batch_id,page_number,dataset="observations"):
     logger.info(
         f"Raw response saved to {file_path}"
     )
-
-
-# batch_id = str(uuid.uuid4())
-# params = {
-#     "monitoring_location_id": "USGS-06115200",
-#     "parameter_code": "00060",
-#     "limit": 1
-# }
-
-# data = fetch_url(
-#     "collections/continuous/items",
-#     params
-# )
-# extracted_at = datetime.now(timezone.utc)
-
-# save_raw_json(data)
