@@ -1,6 +1,6 @@
 # Star schema
 
-\`\`\`text
+```text
                     dim_station
                    (station_key)
                          |
@@ -9,7 +9,7 @@
                     |
             measurement_value
                observed_at
-\`\`\`
+```
 
 | Relation | Grain | Key |
 |---|---|---|

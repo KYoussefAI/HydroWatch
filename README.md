@@ -6,7 +6,7 @@ parameters: discharge (00060), gage height (00065), and water temperature (00010
 
 ## Pipeline
 
-\`\`\`text
+```text
 USGS OGC API
     -> Python ingestion, retries, cursor pagination
     -> PostgreSQL raw tables + archived JSON by batch
@@ -15,7 +15,7 @@ USGS OGC API
     -> dim_station / dim_parameter / dim_date
     -> incremental fact_water_observation
     -> daily summary + rolling outlier marts
-\`\`\`
+```
 
 See [architecture](docs/architecture.md), [data contract](docs/data-contract.md),
 and [design decisions](docs/decisions.md).
@@ -23,23 +23,23 @@ and [design decisions](docs/decisions.md).
 ## Requirements
 
 - Docker Desktop with WSL integration (or another working Docker engine)
-- Python virtual environment, with packages from \`requirements.txt\`
-- dbt-postgres (included in \`requirements.txt\`)
+- Python virtual environment, with packages from `requirements.txt`
+- dbt-postgres (included in `requirements.txt`)
 - PostgreSQL exposed on localhost:5433 using the Compose configuration
 
 ## Local setup
 
-\`\`\`bash
+```bash
 cp .env.example .env
 # Set a PostgreSQL password in .env, then:
 docker compose up -d
 pip install -r requirements.txt
-\`\`\`
+```
 
-The dbt profile lives in \`~/.dbt/profiles.yml\` and is **not** committed.
-Use a profile matching the project's \`hydrowatch_dbt\` name:
+The dbt profile lives in `~/.dbt/profiles.yml` and is **not** committed.
+Use a profile matching the project's `hydrowatch_dbt` name:
 
-\`\`\`yaml
+```yaml
 hydrowatch_dbt:
   target: dev
   outputs:
@@ -52,32 +52,32 @@ hydrowatch_dbt:
       dbname: hydrowatch
       schema: staging
       threads: 4
-\`\`\`
+```
 
-dbt does not load \`.env\` automatically. Export your variable into the shell:
+dbt does not load `.env` automatically. Export your variable into the shell:
 
-\`\`\`bash
+```bash
 set -a
 source .env
 set +a
-\`\`\`
+```
 
 Make the RAW schema in a new database:
 
-\`\`\`bash
+```bash
 docker exec -i hydrowatch-postgres psql -U hydrowatch_user -d hydrowatch \
   < sql/001_create_raw.sql
-\`\`\`
+```
 
-For an existing database, the DDL uses \`IF NOT EXISTS\` and preserves rows.
+For an existing database, the DDL uses `IF NOT EXISTS` and preserves rows.
 It does not migrate incompatible preexisting column types. In particular,
-\`raw.parameters.load_batch_id\` must be \`uuid\`.
+`raw.parameters.load_batch_id` must be `uuid`.
 
 ## Ingest and build
 
 From the repository root:
 
-\`\`\`bash
+```bash
 python src/ingest/load_raw.py
 cd hydrowatch_dbt
 dbt debug
@@ -85,33 +85,33 @@ dbt build
 dbt snapshot
 dbt source freshness
 dbt docs generate
-\`\`\`
+```
 
-The ingestion uses a rolling last-24-hour UTC window unless \`USGS_DATETIME\`
+The ingestion uses a rolling last-24-hour UTC window unless `USGS_DATETIME`
 is set to an explicit historical range, such as:
 
-\`\`\`bash
+```bash
 export USGS_DATETIME='2025-10-09T00:00:00Z/2025-10-10T00:00:00Z'
-\`\`\`
+```
 
-The three selected locations are \`USGS-06115200\`, \`USGS-06066500\`,
-and \`USGS-06052500\`. Data availability varies; a fresh rolling window can
+The three selected locations are `USGS-06115200`, `USGS-06066500`,
+and `USGS-06052500`. Data availability varies; a fresh rolling window can
 be empty, even while metadata is available. Source freshness is a separate
 signal, not proof that all stations produced recent observations.
 
-\`dbt build\` creates the views/tables and runs data tests. \`dbt snapshot\`
-creates/updates station history. \`dbt docs generate\` writes a lineage catalog
-to \`hydrowatch_dbt/target/\`; view it with \`dbt docs serve\`.
+`dbt build` creates the views/tables and runs data tests. `dbt snapshot`
+creates/updates station history. `dbt docs generate` writes a lineage catalog
+to `hydrowatch_dbt/target/`; view it with `dbt docs serve`.
 
 ## Replaying a failed ingestion
 
-Source snapshots are saved under \`data/raw/{observations,stations,parameters}/\`
+Source snapshots are saved under `data/raw/{observations,stations,parameters}/`
 and ignored by Git. Inspect an existing batch before applying it:
 
-\`\`\`bash
+```bash
 python src/ingest/replay_raw.py <original-batch-uuid>
 python src/ingest/replay_raw.py <original-batch-uuid> --apply
-\`\`\`
+```
 
 Replay loads the archived JSON without contacting USGS, using a **new batch ID**
 and a new extraction timestamp. RAW is append-only and replay can create
@@ -127,41 +127,41 @@ RAW contains multiple copies. This assumes the selected USGS time series have
 one meaningful measurement per station/parameter/time; check for collisions
 before expanding to other series.
 
-The fact uses \`delete+insert\` with a deterministic \`observation_key\` and a
+The fact uses `delete+insert` with a deterministic `observation_key` and a
 two-day extraction-time lookback. Normal reruns should not grow the fact.
-For historical corrections outside the lookback, use \`dbt build --full-refresh\`
+For historical corrections outside the lookback, use `dbt build --full-refresh`
 after assessing the affected period.
 
-Station metadata history is stored by the \`snap_stations\` SCD Type 2 snapshot,
+Station metadata history is stored by the `snap_stations` SCD Type 2 snapshot,
 with the station ID as the business key and check columns for name, state, and
 coordinates. Repeated unchanged metadata does not create a new history version.
 
 Marts:
-- \`mart_station_daily\`: min, max, mean, and count by UTC date/station/parameter.
-- \`mart_observation_anomalies\`: exploratory readings more than three sample
+- `mart_station_daily`: min, max, mean, and count by UTC date/station/parameter.
+- `mart_observation_anomalies`: exploratory readings more than three sample
   standard deviations from the preceding 20 readings, with at least eight
   baseline readings. This is not a scientific flood-alert threshold.
 
 ## Validation
 
-From \`hydrowatch_dbt/\`:
+From `hydrowatch_dbt/`:
 
-\`\`\`bash
+```bash
 dbt build
 dbt test
 dbt snapshot
-\`\`\`
+```
 
 From the repository root, the SQL checks can be run with:
 
-\`\`\`bash
+```bash
 docker exec -i hydrowatch-postgres psql -U hydrowatch_user -d hydrowatch \
   < scripts/verify_batches.sql
 docker exec -i hydrowatch-postgres psql -U hydrowatch_user -d hydrowatch \
   < scripts/verify_incremental.sql
-\`\`\`
+```
 
-Record the fact count, rerun \`dbt build\` without changing RAW, and verify
+Record the fact count, rerun `dbt build` without changing RAW, and verify
 that both the count and duplicate count remain unchanged. Re-run after ingesting
 revised source rows. A practical failure test and SCD2 experiment are described
 in [validation notes](docs/validation.md).

@@ -20,7 +20,7 @@ The dimension keys are deterministic MD5 hashes of business identifiers. The dat
 key is an integer YYYYMMDD in UTC. The fact observation key hashes the station ID,
 parameter code, and UTC observation timestamp (microsecond precision).
 
-The grain deliberately excludes \`time_series_id\` and \`statistic_id\`, following the
+The grain deliberately excludes `time_series_id` and `statistic_id`, following the
 initial project contract for selected continuous measurements. If two series share
 the same station, parameter and timestamp, the intermediate model retains only the
 most recently modified/extracted record. Inspect those collisions before expanding
@@ -28,11 +28,11 @@ the pipeline to additional series.
 
 A regular staging view exposes RAW changes without copying rows. The warehouse
 dimensions are rebuilt as tables. The fact uses PostgreSQL incremental
-\`delete+insert\` based on \`observation_key\`; a two-day extraction-time overlap
+`delete+insert` based on `observation_key`; a two-day extraction-time overlap
 allows recent RAW revisions to be reconsidered. A very old corrected observation
 may require a full refresh.
 
-By default dbt's custom schema naming makes configured \`+schema: warehouse\`
-appear as \`staging_warehouse\` when the profile's target schema is \`staging\`.
-The project supplies \`generate_schema_name\` to use \`warehouse\`, \`marts\`, and
-\`intermediate\` directly, while models without a custom schema use \`staging\`.
+By default dbt's custom schema naming makes configured `+schema: warehouse`
+appear as `staging_warehouse` when the profile's target schema is `staging`.
+The project supplies `generate_schema_name` to use `warehouse`, `marts`, and
+`intermediate` directly, while models without a custom schema use `staging`.
