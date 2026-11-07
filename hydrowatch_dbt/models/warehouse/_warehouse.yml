@@ -1,0 +1,64 @@
+version: 2
+
+models:
+  - name: dim_station
+    description: "Current attributes for each monitoring location, one row per station."
+    columns:
+      - name: station_key
+        data_tests: [not_null, unique]
+      - name: station_id
+        data_tests: [not_null, unique]
+      - name: station_name
+        data_tests: [not_null]
+
+  - name: dim_parameter
+    description: "Current definition and unit for each parameter code."
+    columns:
+      - name: parameter_key
+        data_tests: [not_null, unique]
+      - name: parameter_code
+        data_tests: [not_null, unique]
+      - name: parameter_name
+        data_tests: [not_null]
+
+  - name: dim_date
+    description: "Contiguous UTC calendar dates covering available observations."
+    columns:
+      - name: date_key
+        data_tests: [not_null, unique]
+      - name: calendar_date
+        data_tests: [not_null, unique]
+
+  - name: fact_water_observation
+    description: "Latest known measurement per station, parameter, and event timestamp."
+    columns:
+      - name: observation_key
+        description: "Deterministic hash of station ID, parameter code, and UTC event timestamp."
+        data_tests: [not_null, unique]
+      - name: station_key
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_station')
+                field: station_key
+      - name: parameter_key
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_parameter')
+                field: parameter_key
+      - name: date_key
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_key
+      - name: observed_at
+        data_tests: [not_null]
+      - name: measurement_value
+        data_tests: [not_null]
+      - name: source_extracted_at
+        data_tests: [not_null]

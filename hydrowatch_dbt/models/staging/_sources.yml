@@ -2,8 +2,17 @@ version: 2
 
 sources:
   - name: raw
+    description: "USGS records landed by the Python ingestion pipeline."
     schema: raw
+    config:
+      loaded_at_field: extracted_at
+      freshness:
+        warn_after: {count: 2, period: day}
+        error_after: {count: 7, period: day}
     tables:
       - name: observations
+        description: "Append-only continuous monitoring observations."
       - name: stations
+        description: "Append-only monitoring location snapshots."
       - name: parameters
+        description: "Append-only parameter definition snapshots."

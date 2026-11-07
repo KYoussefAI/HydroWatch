@@ -1,6 +1,13 @@
 .env
 .venv/
-tmp.py
 __pycache__/
+.pytest_cache/
 data/raw/
+tmp.py
 current_workflow
+logs/
+dbt_packages/
+target/
+hydrowatch_dbt/logs/
+hydrowatch_dbt/target/
+hydrowatch_dbt/dbt_packages/

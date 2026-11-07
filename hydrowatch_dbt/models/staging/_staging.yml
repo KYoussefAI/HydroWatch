@@ -1,21 +1,8 @@
-version : 2
+version: 2
 
 models:
-  - name : stg_parameters
-    description: "Cleaned USGS measurement parameter definitions."
-  
-    columns:
-      - name : parameter_code
-        data_tests :
-          - not_null
-
-      - name : parameter_name
-        data_tests :
-          - not_null
-
-  - name : stg_observations
-    description : "Cleaned USGS measurement observations definitions."
-
+  - name: stg_observations
+    description: "Typed USGS observations; repeated RAW snapshots remain visible."
     columns:
       - name: monitoring_location_id
         data_tests:
@@ -24,15 +11,6 @@ models:
               arguments:
                 to: ref('stg_stations')
                 field: station_id
-
-      - name : observed_at
-        data_tests:
-          - not_null
-
-      - name : measurement_value
-        data_tests:
-          - not_null
-
       - name: parameter_code
         data_tests:
           - not_null
@@ -40,16 +18,23 @@ models:
               arguments:
                 to: ref('stg_parameters')
                 field: parameter_code
+      - name: observed_at
+        data_tests: [not_null]
+      - name: measurement_value
+        data_tests: [not_null]
 
-
-  - name : stg_stations
-    description : "Cleaned USGS measurement stations definitions."
-
+  - name: stg_stations
+    description: "Monitoring locations with selected attributes extracted from JSONB."
     columns:
-      - name : station_id
-        data_tests:
-          - not_null
+      - name: station_id
+        data_tests: [not_null]
+      - name: station_name
+        data_tests: [not_null]
 
-      - name : station_name
-        data_tests:
-          - not_null
+  - name: stg_parameters
+    description: "Parameter names, measurement units, and definitions from JSONB."
+    columns:
+      - name: parameter_code
+        data_tests: [not_null]
+      - name: parameter_name
+        data_tests: [not_null]
